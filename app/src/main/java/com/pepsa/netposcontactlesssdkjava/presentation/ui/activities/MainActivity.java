@@ -31,12 +31,12 @@ import com.netpluspay.nibssclient.models.TransactionWithRemark;
 import com.netpluspay.nibssclient.models.UserData;
 import com.netpluspay.nibssclient.service.NetposPaymentClient;
 import com.netpluspay.nibssclient.util.NumberExtensionsKt;
-import com.pepsa.netposcontactlesssdkjava.utils.AppUtils;
-import com.pepsa.netposcontactlesssdkjava.data.models.CardResult;
-import com.pepsa.netposcontactlesssdkjava.presentation.ui.dialogs.LoadingDialog;
 import com.pepsa.netposcontactlesssdkjava.R;
 import com.pepsa.netposcontactlesssdkjava.data.enums.Status;
+import com.pepsa.netposcontactlesssdkjava.data.models.CardResult;
 import com.pepsa.netposcontactlesssdkjava.databinding.ActivityMainBinding;
+import com.pepsa.netposcontactlesssdkjava.presentation.ui.dialogs.LoadingDialog;
+import com.pepsa.netposcontactlesssdkjava.utils.AppUtils;
 import com.pixplicity.easyprefs.library.Prefs;
 
 import java.util.Objects;
@@ -69,8 +69,10 @@ public class MainActivity extends AppCompatActivity {
                 if (result.getResultCode() == ContactlessReaderResult.RESULT_OK) {
                     if (data != null) {
                         Long amountToPay = Long.valueOf(amountET.getText().toString());
+                        previousAmount = amountToPay;
                         amountET.getText().clear();
                         String cardReadData = data.getStringExtra("data");
+                        Timber.d("SUCCESS_TAG===>%s", cardReadData);
                         CardResult cardResult = gson.fromJson(cardReadData, CardResult.class);
                         processPayment(cardResult, amountToPay);
                     }
@@ -91,7 +93,6 @@ public class MainActivity extends AppCompatActivity {
                 Intent data = result.getData();
                 if (result.getResultCode() == ContactlessReaderResult.RESULT_OK) {
                     if (data != null) {
-                        Long amountToPay = Long.valueOf(amountET.getText().toString());
                         amountET.getText().clear();
                         String cardReadData = data.getStringExtra("data");
                         CardResult cardResult = gson.fromJson(cardReadData, CardResult.class);
@@ -123,6 +124,11 @@ public class MainActivity extends AppCompatActivity {
                 return;
             }
             String stringAmt = amountET.getText().toString();
+            if (stringAmt.isEmpty()) {
+                Toast.makeText(this, getString(R.string.enter_valid_amount), Toast.LENGTH_LONG)
+                        .show();
+                return;
+            }
             long amt = Long.parseLong(amountET.getText().toString());
             if (Objects.equals(stringAmt, "") || amt < 200L) {
                 Toast.makeText(this, getString(R.string.enter_valid_amount), Toast.LENGTH_LONG)
@@ -193,9 +199,11 @@ public class MainActivity extends AppCompatActivity {
                         loaderDialog.dismiss();
                         KeyHolder keyHolder = response.getFirst();
                         ConfigData configData = response.getSecond();
-                        String pinKey = KeyHolderKt.getClearPinKey(keyHolder);
-                        Prefs.putString(AppUtils.KEY_HOLDER, gson.toJson(keyHolder));
-                        Prefs.putString(AppUtils.CONFIG_DATA, gson.toJson(configData));
+                        if (keyHolder != null) {
+                            String pinKey = KeyHolderKt.getClearPinKey(keyHolder);
+                            Prefs.putString(AppUtils.KEY_HOLDER, gson.toJson(keyHolder));
+                            Prefs.putString(AppUtils.CONFIG_DATA, gson.toJson(configData));
+                        }
                     }
 
                     @Override
@@ -209,30 +217,6 @@ public class MainActivity extends AppCompatActivity {
                         Timber.d("%s%s", AppUtils.ERROR_TAG, e.getLocalizedMessage());
                     }
                 });
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        super.onActivityResult(requestCode, resultCode, data);
-        if (resultCode == ContactlessReaderResult.RESULT_OK) {
-            if (data != null) {
-                Long amountToPay = Long.valueOf(amountET.getText().toString());
-                amountET.getText().clear();
-                String cardReadData = data.getStringExtra("data");
-                CardResult cardResult = gson.fromJson(cardReadData, CardResult.class);
-                processPayment(cardResult, amountToPay);
-            }
-        }
-        if (resultCode == ContactlessReaderResult.RESULT_ERROR) {
-            if (data != null) {
-                String error = data.getStringExtra("data");
-                if (error != null) {
-                    Timber.d("ERROR_TAG===>%s", error);
-                    resultViewerTextView.setText(error);
-                }
-            }
-        }
     }
 
 
@@ -263,8 +247,8 @@ public class MainActivity extends AppCompatActivity {
                         cardResult.getCardScheme(),
                         AppUtils.CARD_HOLDER_NAME,
                         "TESTING_TESTING",
-                        "231209675431",
-                        "7589"
+                        "231209675431", // Kindly pass empty string to make the sdk generate a unique one for you
+                        "7589" // Kindly pass empty string to make the sdk generate a unique one for you
                 ).subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new SingleObserver<TransactionWithRemark>() {

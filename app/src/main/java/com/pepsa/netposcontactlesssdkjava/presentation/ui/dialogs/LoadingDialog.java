@@ -14,12 +14,11 @@ import com.pepsa.netposcontactlesssdkjava.R;
 import com.pepsa.netposcontactlesssdkjava.databinding.LayoutLoadingDialogBinding;
 
 public class LoadingDialog extends DialogFragment {
+    private String loadingMessage;
     public void setLoadingMessage(String loadingMessage) {
         this.loadingMessage = loadingMessage;
-        binding.loadingMessage.setText(loadingMessage);
     }
 
-    private String loadingMessage;
     private LayoutLoadingDialogBinding binding;
 
     public LoadingDialog() {
