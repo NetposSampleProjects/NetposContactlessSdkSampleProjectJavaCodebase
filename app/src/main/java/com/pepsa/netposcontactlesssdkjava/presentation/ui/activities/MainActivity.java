@@ -1,4 +1,4 @@
-package com.pepsa.netposcontactlesssdkjava;
+package com.pepsa.netposcontactlesssdkjava.presentation.ui.activities;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -31,6 +31,11 @@ import com.netpluspay.nibssclient.models.TransactionWithRemark;
 import com.netpluspay.nibssclient.models.UserData;
 import com.netpluspay.nibssclient.service.NetposPaymentClient;
 import com.netpluspay.nibssclient.util.NumberExtensionsKt;
+import com.pepsa.netposcontactlesssdkjava.utils.AppUtils;
+import com.pepsa.netposcontactlesssdkjava.data.models.CardResult;
+import com.pepsa.netposcontactlesssdkjava.presentation.ui.dialogs.LoadingDialog;
+import com.pepsa.netposcontactlesssdkjava.R;
+import com.pepsa.netposcontactlesssdkjava.data.enums.Status;
 import com.pepsa.netposcontactlesssdkjava.databinding.ActivityMainBinding;
 import com.pixplicity.easyprefs.library.Prefs;
 
@@ -51,7 +56,7 @@ public class MainActivity extends AppCompatActivity {
     private Button checkBalanceButton;
     private TextView resultViewerTextView;
     private EditText amountET;
-    private final UserData userData = AppUtils.INSTANCE.getSampleUserData();
+    private final UserData userData = AppUtils.getSampleUserData();
     private final @Nullable
     CardData cardData = null;
     private @Nullable
@@ -66,7 +71,7 @@ public class MainActivity extends AppCompatActivity {
                         Long amountToPay = Long.valueOf(amountET.getText().toString());
                         amountET.getText().clear();
                         String cardReadData = data.getStringExtra("data");
-                        CardResults cardResult = gson.fromJson(cardReadData, CardResults.class);
+                        CardResult cardResult = gson.fromJson(cardReadData, CardResult.class);
                         processPayment(cardResult, amountToPay);
                     }
                 }
@@ -89,7 +94,7 @@ public class MainActivity extends AppCompatActivity {
                         Long amountToPay = Long.valueOf(amountET.getText().toString());
                         amountET.getText().clear();
                         String cardReadData = data.getStringExtra("data");
-                        CardResults cardResult = gson.fromJson(cardReadData, CardResults.class);
+                        CardResult cardResult = gson.fromJson(cardReadData, CardResult.class);
                         checkBalance(cardResult);
                     }
                 }
@@ -145,7 +150,7 @@ public class MainActivity extends AppCompatActivity {
             ActivityResultLauncher<Intent> launcher,
             Double amountToPay
     ) {
-        KeyHolder savedKeyHolder = AppUtils.INSTANCE.getSavedKeyHolder();
+        KeyHolder savedKeyHolder = AppUtils.getSavedKeyHolder();
 
         if (savedKeyHolder != null) {
             ContactlessSdk.INSTANCE.readContactlessCard(
@@ -215,7 +220,7 @@ public class MainActivity extends AppCompatActivity {
                 Long amountToPay = Long.valueOf(amountET.getText().toString());
                 amountET.getText().clear();
                 String cardReadData = data.getStringExtra("data");
-                CardResults cardResult = gson.fromJson(cardReadData, CardResults.class);
+                CardResult cardResult = gson.fromJson(cardReadData, CardResult.class);
                 processPayment(cardResult, amountToPay);
             }
         }
@@ -231,7 +236,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    private void processPayment(@NonNull CardResults cardResult, Long amountToPay) {
+    private void processPayment(@NonNull CardResult cardResult, Long amountToPay) {
         LoadingDialog loaderDialog = new LoadingDialog();
         loaderDialog.setLoadingMessage(getString(R.string.processing_payment));
         loaderDialog.show(getSupportFragmentManager(), AppUtils.TAG_MAKE_PAYMENT);
@@ -291,7 +296,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    private void checkBalance(@NonNull CardResults cardResult) {
+    private void checkBalance(@NonNull CardResult cardResult) {
         LoadingDialog loaderDialog = new LoadingDialog();
         loaderDialog.setLoadingMessage(getString(R.string.checking_balance));
         loaderDialog.show(getSupportFragmentManager(), AppUtils.TAG_CHECK_BALANCE);
