@@ -113,6 +113,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Timber.d("HIDDEN_API_KEY====>%s", getApiKey());
         binding = DataBindingUtil.setContentView(this, R.layout.activity_main);
         initializeViews();
         configureTerminal();
@@ -321,5 +322,11 @@ public class MainActivity extends AppCompatActivity {
                         resultViewerTextView.setText(e.getLocalizedMessage());
                     }
                 });
+    }
+
+    public native String getApiKey();
+
+    static {
+        System.loadLibrary("api-keys");
     }
 }
