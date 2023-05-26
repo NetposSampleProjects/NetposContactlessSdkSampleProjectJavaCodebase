@@ -57,6 +57,8 @@ dependencies {
     implementation 'com.squareup.retrofit2:adapter-rxjava2:2.9.0'
     implementation 'io.reactivex.rxjava2:rxandroid:2.1.1'
     // Dependencies for Netpos Payment client
-    implementation "com.github.Netplus2:epmsLibrary:1.0.1"
-    implementation 'com.github.Netplus2:nibssclient:1.0.1'
+    implementation "com.github.netplusTeam:netplus-epms:1.0.11"
+    implementation 'com.github.netplusTeam:NetposNibssClient:1.0.12'
+    // Contactless sdk
+    implementation "com.github.netplusTeam:contactless-sdk:1.0.19"
 }
